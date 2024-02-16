@@ -22,8 +22,6 @@
 // responsiveness.
 // Include proper error handling and reporting for cases such as invalid URLs or network failures.
 
-package Q6;
-
 import javax.swing.*;
 import java.awt.*;
 import java.net.*;
@@ -55,12 +53,12 @@ public class ImageDownloaderGUI extends JFrame {
         JPanel mainPanel = new JPanel(new BorderLayout());
 
         JPanel inputPanel = new JPanel(new FlowLayout());
-        urlField = new JTextField(30);
+        urlField = new JTextField("https://img.freepik.com/premium-vector/flat-store-facade-with-awning_23-2147542588.jpg");
         downloadButton = new JButton("Download");
         cancelButton = new JButton("Cancel");
         pauseResumeButton = new JButton("Pause");
 
-        inputPanel.add(new JLabel("URLs (separated by comma):"));
+        inputPanel.add(new JLabel("URLs :"));
         inputPanel.add(urlField);
         inputPanel.add(downloadButton);
         inputPanel.add(cancelButton);
@@ -96,6 +94,7 @@ public class ImageDownloaderGUI extends JFrame {
                 if (!currentUrl.isEmpty()) {
                     Future<?> downloadTask = executorService.submit(() -> {
                         try {
+                            @SuppressWarnings("deprecation")
                             URL imageUrl = new URL(currentUrl);
                             HttpURLConnection connection = (HttpURLConnection) imageUrl.openConnection();
                             long totalBytes = connection.getContentLengthLong();
