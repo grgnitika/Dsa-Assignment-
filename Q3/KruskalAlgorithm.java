@@ -1,4 +1,7 @@
-// Implement Kruskal algorithm and priority queue using minimum heap.
+/*
+b)
+Implement Kruskal algorithm and priority queue using minimum heap.
+*/
 
 package Q3;
 
@@ -70,7 +73,7 @@ public class KruskalAlgorithm {
     }
 
     public void findMinimumSpanningTree() {
-        // Sort edges by weight using a priority queue (minimum heap)
+        // Sorting the edges by weight using a priority queue (minimum heap)
         for (Edge edge : edges) {
             minHeap.offer(edge);
         }

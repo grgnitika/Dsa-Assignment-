@@ -33,11 +33,11 @@ import java.util.concurrent.*;
 public class ImageDownloaderGUI extends JFrame {
     private JTextField urlField;
     private JButton downloadButton, cancelButton, pauseResumeButton;
-    private JProgressBar progressBar;
+    private JPanel progressPanel;
     private JLabel statusLabel;
 
     private ExecutorService executorService;
-    private List<Future<?>> downloadTasks;
+    private List<DownloadTask> downloadTasks;
     private volatile boolean paused = false;
 
     public ImageDownloaderGUI() {
@@ -64,11 +64,12 @@ public class ImageDownloaderGUI extends JFrame {
         inputPanel.add(cancelButton);
         inputPanel.add(pauseResumeButton);
 
-        progressBar = new JProgressBar();
+        progressPanel = new JPanel();
+        progressPanel.setLayout(new BoxLayout(progressPanel, BoxLayout.Y_AXIS));
         statusLabel = new JLabel("Status: ");
 
         mainPanel.add(inputPanel, BorderLayout.NORTH);
-        mainPanel.add(progressBar, BorderLayout.CENTER);
+        mainPanel.add(progressPanel, BorderLayout.CENTER);
         mainPanel.add(statusLabel, BorderLayout.SOUTH);
 
         add(mainPanel);
@@ -85,67 +86,18 @@ public class ImageDownloaderGUI extends JFrame {
         String[] urls = urlsInput.split(",");
         if (urls.length > 0) {
             if (executorService == null || executorService.isShutdown()) {
-                executorService = Executors.newCachedThreadPool();
+                // Create a ThreadPoolExecutor with a fixed number of threads
+                int numberOfThreads = Runtime.getRuntime().availableProcessors(); // Get the number of available processors
+                executorService = Executors.newFixedThreadPool(numberOfThreads);
                 downloadTasks = new ArrayList<>();
             }
 
             for (String url : urls) {
                 final String currentUrl = url.trim();
                 if (!currentUrl.isEmpty()) {
-                    Future<?> downloadTask = executorService.submit(() -> {
-                        try {
-                            @SuppressWarnings("deprecation")
-                            URL imageUrl = new URL(currentUrl);
-                            HttpURLConnection connection = (HttpURLConnection) imageUrl.openConnection();
-                            long totalBytes = connection.getContentLengthLong();
-                            InputStream inputStream = connection.getInputStream();
-                            String fileName = imageUrl.getFile();
-                            int index = fileName.lastIndexOf('/');
-                            if (index != -1 && index < fileName.length() - 1) {
-                                fileName = fileName.substring(index + 1);
-                            } else {
-                                fileName = "downloaded_image";
-                            }
-                            File file = new File(fileName);
-
-                            FileOutputStream outputStream = new FileOutputStream(file);
-
-                            byte[] buffer = new byte[1024];
-                            int bytesRead;
-                            long totalBytesRead = 0;
-
-                            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                                if (paused) {
-                                    statusLabel.setText("Status: Download Paused");
-                                    while (paused) {
-                                        Thread.sleep(100);
-                                    }
-                                    statusLabel.setText("Status: Download Resumed");
-                                }
-                                outputStream.write(buffer, 0, bytesRead);
-                                totalBytesRead += bytesRead;
-                                int progress = (int) ((totalBytesRead * 100) / totalBytes);
-                                SwingUtilities.invokeLater(() -> {
-                                    progressBar.setValue(progress);
-                                    statusLabel.setText("Status: Downloading " + currentUrl + "... " + progress + "%");
-                                });
-                                Thread.sleep(100);
-                            }
-
-                            inputStream.close();
-                            outputStream.close();
-
-                            SwingUtilities.invokeLater(() -> {
-                                statusLabel.setText("Status: Download Complete for " + currentUrl);
-                            });
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
-                            SwingUtilities.invokeLater(() -> {
-                                statusLabel.setText("Status: Error downloading image from " + currentUrl);
-                            });
-                        }
-                    });
+                    DownloadTask downloadTask = new DownloadTask(currentUrl);
                     downloadTasks.add(downloadTask);
+                    executorService.submit(downloadTask);
                 }
             }
             cancelButton.setEnabled(true);
@@ -155,10 +107,8 @@ public class ImageDownloaderGUI extends JFrame {
 
     private void cancelDownload() {
         if (downloadTasks != null) {
-            for (Future<?> task : downloadTasks) {
-                if (!task.isDone() && !task.isCancelled()) {
-                    task.cancel(true);
-                }
+            for (DownloadTask task : downloadTasks) {
+                task.cancel();
             }
             downloadTasks.clear();
         }
@@ -170,6 +120,100 @@ public class ImageDownloaderGUI extends JFrame {
     private void pauseResumeDownload() {
         paused = !paused;
         pauseResumeButton.setText(paused ? "Resume" : "Pause");
+        if (!paused) {
+            for (DownloadTask task : downloadTasks) {
+                task.resumeDownload();
+            }
+        } else {
+            for (DownloadTask task : downloadTasks) {
+                task.pauseDownload();
+            }
+        }
+    }
+
+    private class DownloadTask implements Runnable {
+        private String url;
+        private JProgressBar progressBar;
+        private JLabel downloadStatusLabel;
+        private volatile boolean cancelled = false;
+        private volatile boolean pausedTask = false;
+
+        public DownloadTask(String url) {
+            this.url = url;
+            progressBar = new JProgressBar();
+            downloadStatusLabel = new JLabel("Downloading " + url + "...");
+            progressPanel.add(downloadStatusLabel);
+            progressPanel.add(progressBar);
+            progressPanel.revalidate();
+        }
+
+        public void run() {
+            try {
+                URL imageUrl = new URL(url);
+                HttpURLConnection connection = (HttpURLConnection) imageUrl.openConnection();
+                long totalBytes = connection.getContentLengthLong();
+                InputStream inputStream = connection.getInputStream();
+                String fileName = imageUrl.getFile();
+                int index = fileName.lastIndexOf('/');
+                if (index != -1 && index < fileName.length() - 1) {
+                    fileName = fileName.substring(index + 1);
+                } else {
+                    fileName = "downloaded_image";
+                }
+                File file = new File(fileName);
+
+                FileOutputStream outputStream = new FileOutputStream(file);
+
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+                long totalBytesRead = 0;
+
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    synchronized (this) {
+                        while (pausedTask && !cancelled) {
+                            wait();
+                        }
+                    }
+                    if (cancelled) {
+                        downloadStatusLabel.setText("Download Cancelled");
+                        return;
+                    }
+                    outputStream.write(buffer, 0, bytesRead);
+                    totalBytesRead += bytesRead;
+                    int progress = (int) ((totalBytesRead * 100) / totalBytes);
+                    SwingUtilities.invokeLater(() -> {
+                        progressBar.setValue(progress);
+                        downloadStatusLabel.setText("Downloading " + url + "... " + progress + "%");
+                    });
+                    Thread.sleep(100);
+                }
+
+                inputStream.close();
+                outputStream.close();
+
+                SwingUtilities.invokeLater(() -> {
+                    downloadStatusLabel.setText("Download Complete for " + url);
+                });
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                SwingUtilities.invokeLater(() -> {
+                    downloadStatusLabel.setText("Error downloading image from " + url);
+                });
+            }
+        }
+
+        public synchronized void cancel() {
+            cancelled = true;
+        }
+
+        public synchronized void pauseDownload() {
+            pausedTask = true;
+        }
+
+        public synchronized void resumeDownload() {
+            pausedTask = false;
+            notify();
+        }
     }
 
     public static void main(String[] args) {
