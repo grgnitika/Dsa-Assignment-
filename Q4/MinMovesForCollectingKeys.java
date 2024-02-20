@@ -1,25 +1,26 @@
-// You are given a 2D grid representing a maze in a virtual game world. The grid is of size m x n 
-// and consists of different types of cells:
-// 'P' represents an empty path where you can move freely. 'W' represents a wall that you cannot 
-// pass through. 'S' represents the starting point. Lowercase letters represent hidden keys. 
-// Uppercase letters represent locked doors.
-// You start at the starting point 'S' and can move in any of the four cardinal directions (up, down, 
-// left, right) to adjacent cells. However, you cannot walk through walls ('W').
-// As you explore the maze, you may come across hidden keys represented by lowercase letters. 
-// To unlock a door represented by an uppercase letter, you need to collect the corresponding key 
-// first. Once you have a key, you can pass through the corresponding locked door.
-// For some 1 <= k <= 6, there is exactly one lowercase and one uppercase letter of the first k 
-// letters of the English alphabet in the maze. This means that there is exactly one key for each 
-// door, and one door for each key. The letters used to represent the keys and doors follow the 
-// English alphabet order.
-// Your task is to find the minimum number of moves required to collect all the keys. If it is 
-// impossible to collect all the keys and reach the exit, return -1.
-// Example:
-// Input: grid = [ ["S","P","q","P","P"], ["W","W","W","P","W"], ["r","P","Q","P","R"]] 
- 
-// Output: 8
-// The goal is to Collect all key 
+/* 
+a)
+A 2D grid representing a maze in a virtual game world is given. The grid is of size m x n 
+and consists of different types of cells: 'P' represents an empty path where you can move 
+freely. 'W' represents a wall that you cannot pass through. 'S' represents the starting 
+point. Lowercase letters represent hidden keys. Uppercase letters represent locked doors.
+You start at the starting point 'S' and can move in any of the four cardinal directions 
+(up, down, left, right) to adjacent cells. However, you cannot walk through walls ('W').
+As you explore the maze, you may come across hidden keys represented by lowercase letters. 
+To unlock a door represented by an uppercase letter, you need to collect the corresponding key 
+first. Once you have a key, you can pass through the corresponding locked door.
+For some 1 <= k <= 6, there is exactly one lowercase and one uppercase letter of the first k 
+letters of the English alphabet in the maze. This means that there is exactly one key for each 
+door, and one door for each key. The letters used to represent the keys and doors follow the 
+English alphabet order.
+The task is to find the minimum number of moves required to collect all the keys. If it is 
+impossible to collect all the keys and reach the exit, return -1.
 
+Example:
+Input: grid = [ ["S","P","q","P","P"], ["W","W","W","P","W"], ["r","P","Q","P","R"]] 
+Output: 8
+Note: The goal is to Collect all key.
+*/
 
 package Q4;
 
@@ -28,7 +29,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
-public class SolvingMaze {
+public class MinMovesForCollectingKeys {
     static class State {
         int x, y, keys, steps;
 
@@ -65,7 +66,7 @@ public class SolvingMaze {
         while (!queue.isEmpty()) {
             State current = queue.poll();
 
-            // Check if all keys collected
+            // Checking if all keys collected
             if (current.keys == allKeys)
                 return current.steps;
 
@@ -74,13 +75,13 @@ public class SolvingMaze {
                 int newKeys = current.keys;
                 if (newX >= 0 && newX < m && newY >= 0 && newY < n) {
                     char cell = grid[newX].charAt(newY);
-                    // Check if it's a wall
+                    // Checks if it's a wall
                     if (cell == 'W')
                         continue;
-                    // Check if it's a door and we have the key
+                    // Checks if it's a door and we have the key
                     if (cell >= 'A' && cell <= 'F' && (newKeys & (1 << (cell - 'A'))) == 0)
                         continue;
-                    // Collect key if found
+                    // Collects key if found
                     if (cell >= 'a' && cell <= 'f')
                         newKeys |= (1 << (cell - 'a'));
 
@@ -93,7 +94,7 @@ public class SolvingMaze {
             }
         }
 
-        // exit the loop,if no solution found
+        // exits the loop,if no solution found
         return -1;
     }
 

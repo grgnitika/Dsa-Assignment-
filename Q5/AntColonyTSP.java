@@ -1,4 +1,7 @@
-// Implement ant colony algorithm solving travelling a salesman problem.
+/*
+a)
+Implement ant colony algorithm solving travelling a salesman problem.
+*/
 
 package Q5;
 

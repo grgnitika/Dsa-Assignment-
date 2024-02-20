@@ -1,11 +1,14 @@
-// You are provided with balanced binary tree with the target value k. return x number of values 
-// that are closest to the given target k. provide solution in O(n)
-// Note: You have only one set of unique values x in binary search tree that are closest to the 
-// target.
-// Input: 
-// K=3.8
-// x=2
-// Output: 3,4
+/* 
+b)
+A balanced binary tree is given with the target value k. The task is to return x number 
+of values that are closest to the given target k. The solution should be in O(n).
+Note: There is only one set of unique values x in binary search tree that are closest to the 
+target.
+Input: 
+K=3.8
+x=2
+Output: 3,4
+*/
 
 package Q4;
 
@@ -21,7 +24,7 @@ class TreeNode {
     }
 }
 
-public class ClosestValuesInBST {
+public class ClosestValues {
     public static List<Integer> closestValues(TreeNode root, double target, int x) {
         List<Integer> result = new ArrayList<>();
         List<Integer> inorder = new ArrayList<>();

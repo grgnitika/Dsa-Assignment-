@@ -1,19 +1,22 @@
-// Assume you were hired to create an application for an ISP, and there are n network devices, 
-// such as routers, that are linked together to provide internet access to users. You are given 
-// a 2D array that represents network connections between these network devices. write an algorithm 
-// to return impacted network devices, If there is a power outage on a certain device, these 
-// impacted device list assist you notify linked consumers that there is a power outage and it 
-// will take some time to rectify an issue.
+/* 
+b)
+You are hired to create an application for an ISP, and there are n network devices, 
+such as routers, that are linked together to provide internet access to users. A 2D array 
+that represents network connections between these network devices is given. The task is to 
+write an algorithm to return impacted network devices, If there is a power outage on a 
+certain device, these impacted device list assist you notify linked consumers that there 
+is a power outage and it will take some time to rectify an issue.
 
-// Input: edges= {{0,1},{0,2},{1,3},{1,6},{2,4},{4,6},{4,5},{5,7}}
-// Target Device (On which power Failure occurred): 4
-// Output (Impacted Device List) = {5,7}
+Input: edges= {{0,1},{0,2},{1,3},{1,6},{2,4},{4,6},{4,5},{5,7}}
+Target Device (On which power Failure occurred): 4
+Output (Impacted Device List) = {5,7}
+*/
 
 package Q5;
 
 import java.util.*;
 
-public class NetworkDeviceImpact {
+public class ImpactedNetworkDevices {
     int[] disc, low;
     int time = 1;
     List<List<Integer>> ans = new ArrayList<>();
@@ -86,7 +89,7 @@ public class NetworkDeviceImpact {
     }
 
     public static void main(String[] args) {
-        NetworkDeviceImpact q5B = new NetworkDeviceImpact();
+        ImpactedNetworkDevices q5B = new ImpactedNetworkDevices();
 
         int n = 8;
         List<List<Integer>> connections = new ArrayList<>();
