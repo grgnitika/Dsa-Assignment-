@@ -106,12 +106,12 @@ import Entities.User;
             connection = DriverManager.getConnection("jdbc:mysql://localhost:3306","root","Nitika");
             statement = connection.createStatement();
 
-            statement.execute("create database if not exists dsa_db");
-            statement.execute("use dsa_db");
+            statement.execute("create database if not exists socialapp_db");
+            statement.execute("use socialapp_db");
             statement.execute("create table if not exists "  + username + " (post TEXT,image LONGBLOB)");
-            statement.execute("create table if not exists friendsof"  + username + " (friends varchar(100),email varchar(100))");
-            statement.execute("create table if not exists notificationsof"  + username + " (friends varchar(100),email varchar(100))");
-            statement.execute("create table if not exists requestsby"  + username + " (friends varchar(100),email varchar(100))");
+            statement.execute("create table if not exists friends"  + username + " (friends varchar(100),email varchar(100))");
+            statement.execute("create table if not exists notifications"  + username + " (friends varchar(100),email varchar(100))");
+            statement.execute("create table if not exists frequests"  + username + " (friends varchar(100),email varchar(100))");
             statement.execute("create table if not exists news (id INT AUTO_INCREMENT PRIMARY KEY, title VARCHAR(255) NOT NULL, url VARCHAR(255) NOT NULL, description TEXT, publication_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
 
 
@@ -186,7 +186,7 @@ import Entities.User;
                 }
             });
 
-            ResultSet totalNotifications = statement.executeQuery("select * from notificationsof" + username);
+            ResultSet totalNotifications = statement.executeQuery("select * from notifications" + username);
             int x = 0;
             while(totalNotifications.next()){x++;}
 
@@ -661,7 +661,7 @@ import Entities.User;
                     }
                     else{
                         try {
-                            ResultSet totalUsers = statement.executeQuery("select username,email from userCredentials");
+                            ResultSet totalUsers = statement.executeQuery("select username,email from socialusers");
                             String[][] users = new String[1000][1000];
                             int x = 0;
                             while(totalUsers.next()){
@@ -672,7 +672,7 @@ import Entities.User;
                                     x++;
                                 }
                             }
-                            ResultSet totalFriends = statement.executeQuery("select * from friendsof" + username);
+                            ResultSet totalFriends = statement.executeQuery("select * from friends" + username);
                             String[] friends = new String[1000];
                             int noOfFriends = 0;
                             while(totalFriends.next()){
@@ -680,7 +680,7 @@ import Entities.User;
                                 noOfFriends++;
                             }
 
-                            ResultSet totalRequests = statement.executeQuery("select * from requestsby" + username);
+                            ResultSet totalRequests = statement.executeQuery("select * from frequests" + username);
                             String[] requests = new String[1000];
                             int noOfRequests = 0;
                             while(totalRequests.next()){
@@ -688,7 +688,7 @@ import Entities.User;
                                 noOfRequests++;
                             }
 
-                            ResultSet totalNotifications = statement.executeQuery("select * from notificationsof" + username);
+                            ResultSet totalNotifications = statement.executeQuery("select * from notifications" + username);
                             String[] notifications = new String[1000];
                             int noOfNotifications = 0;
                             while(totalNotifications.next()){
@@ -737,13 +737,13 @@ import Entities.User;
                                         else if(followingLabel[effectiveFinalI].getText().equals("Follow")){
                                             followingLabel[effectiveFinalI].setText("Requested");
                                             try {
-                                                String insertQuery = "INSERT INTO requestsby" + username + " VALUES (?,?)";
+                                                String insertQuery = "INSERT INTO frequests" + username + " VALUES (?,?)";
                                                 PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
                                                 preparedStatement.setString(1, usernameLabels[effectiveFinalI].getText());
                                                 preparedStatement.setString(2, emailLabels[effectiveFinalI].getText());
                                                 preparedStatement.executeUpdate();
 
-                                                String insertQuery2 = "INSERT INTO notificationsof" + usernameLabels[effectiveFinalI].getText() + " VALUES (?,?)";
+                                                String insertQuery2 = "INSERT INTO notifications" + usernameLabels[effectiveFinalI].getText() + " VALUES (?,?)";
                                                 PreparedStatement preparedStatement2 = connection.prepareStatement(insertQuery2);
                                                 preparedStatement2.setString(1, username);
                                                 preparedStatement2.setString(2, email);
@@ -756,24 +756,24 @@ import Entities.User;
                                         else if (followingLabel[effectiveFinalI].getText().equals("Accept")){
                                             followingLabel[effectiveFinalI].setText("Accepted");
                                             try {
-                                                String insertQuery = "INSERT INTO friendsof" + username + " VALUES (?,?)";
+                                                String insertQuery = "INSERT INTO friends" + username + " VALUES (?,?)";
                                                 PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
                                                 preparedStatement.setString(1, usernameLabels[effectiveFinalI].getText());
                                                 preparedStatement.setString(2, emailLabels[effectiveFinalI].getText());
                                                 preparedStatement.executeUpdate();
 
-                                                String insertQuery2 = "INSERT INTO friendsof" + usernameLabels[effectiveFinalI].getText() + " VALUES (?,?)";
+                                                String insertQuery2 = "INSERT INTO friends" + usernameLabels[effectiveFinalI].getText() + " VALUES (?,?)";
                                                 PreparedStatement preparedStatement2 = connection.prepareStatement(insertQuery2);
                                                 preparedStatement2.setString(1, username);
                                                 preparedStatement2.setString(2, email);
                                                 preparedStatement2.executeUpdate();
 
-                                                String insertQuery3 = "DELETE FROM requestsby" + usernameLabels[effectiveFinalI].getText() + " where friends = ?" ;
+                                                String insertQuery3 = "DELETE FROM frequests" + usernameLabels[effectiveFinalI].getText() + " where friends = ?" ;
                                                 PreparedStatement preparedStatement3 = connection.prepareStatement(insertQuery3);
                                                 preparedStatement3.setString(1,username);
                                                 preparedStatement3.executeUpdate();
 
-                                                String insertQuery4 = "DELETE FROM notificationsof" + username + " where friends = ?" ;
+                                                String insertQuery4 = "DELETE FROM notifications" + username + " where friends = ?" ;
                                                 PreparedStatement preparedStatement4 = connection.prepareStatement(insertQuery4);
                                                 preparedStatement4.setString(1,usernameLabels[effectiveFinalI].getText());
                                                 preparedStatement4.executeUpdate();
@@ -810,7 +810,7 @@ import Entities.User;
                                 friendsListPanel.add(followingLabel[i]);
 
                                 friendsListPanel.repaint();
-                                FriendRecommendation friendRecommendation = new FriendRecommendation(connection);
+                                RecommendFriends friendRecommendation = new RecommendFriends(connection);
                                 friendRecommendation.showRecommendations(username);
 
 
@@ -858,7 +858,7 @@ import Entities.User;
             RSPanelforMessaging.setBounds(260,30,525,600);
             RSPanelforMessaging.setVisible(false);
 
-            messagingLabel = new JLabel("Messaging");
+            messagingLabel = new JLabel("Inbox");
             messagingLabel.setForeground(Color.black);
             messagingLabel.setFont(new Font("Helvetica",Font.BOLD,20));
             messagingLabel.setBounds(0,0,200,50);
@@ -908,7 +908,7 @@ import Entities.User;
                     else{
 
                         try {
-                            ResultSet totalFriends = statement.executeQuery("select * from friendsof" + username);
+                            ResultSet totalFriends = statement.executeQuery("select * from friends" + username);
                             String[][] users = new String[1000][1000];
                             int x = 0;
                             while(totalFriends.next()){
@@ -1006,11 +1006,11 @@ import Entities.User;
                     try{
                         String insertQuery = "";
                         if(!chatContentTextField.getText().isBlank()){
-                            if(doesTableExist(connection, "chatsof" + username + toFriend)){
-                                insertQuery = "insert into chatsof" + username + toFriend + " values(?,?)";
+                            if(doesTableExist(connection, "chats" + username + toFriend)){
+                                insertQuery = "insert into chats" + username + toFriend + " values(?,?)";
                             }
-                            else if(doesTableExist(connection, "chatsof" + toFriend + username)){
-                                insertQuery = "insert into chatsof" + toFriend + username + " values(?,?)";                            }
+                            else if(doesTableExist(connection, "chats" + toFriend + username)){
+                                insertQuery = "insert into chats" + toFriend + username + " values(?,?)";                            }
                         }
                         PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
                         preparedStatement.setString(1,username);
@@ -1204,7 +1204,7 @@ import Entities.User;
             return false;
         }
     void updateNotifications() throws Exception{
-        ResultSet totalNotifications = statement.executeQuery("select * from notificationsof" + username);
+        ResultSet totalNotifications = statement.executeQuery("select * from notifications" + username);
         String[][] users = new String[1000][1000];
         int x = 0;
         while(totalNotifications.next()){
@@ -1242,29 +1242,29 @@ import Entities.User;
         public void mouseClicked(MouseEvent e){
             acceptLabels[effectiveFinalI].setText("Accepted");
             try {
-                String insertQuery = "INSERT INTO friendsof" + username + " VALUES (?,?)";
+                String insertQuery = "INSERT INTO friends" + username + " VALUES (?,?)";
                 PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
                 preparedStatement.setString(1, usernameLabels[effectiveFinalI].getText());
                 preparedStatement.setString(2, emailLabels[effectiveFinalI].getText());
                 preparedStatement.executeUpdate();
 
-                String insertQuery2 = "INSERT INTO friendsof" + usernameLabels[effectiveFinalI].getText() + " VALUES (?,?)";
+                String insertQuery2 = "INSERT INTO friends" + usernameLabels[effectiveFinalI].getText() + " VALUES (?,?)";
                 PreparedStatement preparedStatement2 = connection.prepareStatement(insertQuery2);
                 preparedStatement2.setString(1, username);
                 preparedStatement2.setString(2, email);
                 preparedStatement2.executeUpdate();
 
-                String insertQuery3 = "DELETE FROM requestsby" + usernameLabels[effectiveFinalI].getText() + " where friends = ?" ;
+                String insertQuery3 = "DELETE FROM frequests" + usernameLabels[effectiveFinalI].getText() + " where friends = ?" ;
                 PreparedStatement preparedStatement3 = connection.prepareStatement(insertQuery3);
                 preparedStatement3.setString(1,username);
                 preparedStatement3.executeUpdate();
 
-                String insertQuery4 = "DELETE FROM notificationsof" + username + " where friends = ?" ;
+                String insertQuery4 = "DELETE FROM notifications" + username + " where friends = ?" ;
                 PreparedStatement preparedStatement4 = connection.prepareStatement(insertQuery4);
                 preparedStatement4.setString(1,usernameLabels[effectiveFinalI].getText());
                 preparedStatement4.executeUpdate();
 
-                statement.execute("create table chatsof" + username + usernameLabels[effectiveFinalI].getText() +  "(sender varchar(100), message varchar(100))");
+                statement.execute("create table chats" + username + usernameLabels[effectiveFinalI].getText() +  "(sender varchar(100), message varchar(100))");
                 } catch (SQLException e1) {
                     e1.printStackTrace();
                 }
@@ -1355,7 +1355,7 @@ import Entities.User;
 
     void updateSocialPosts() throws Exception{
 
-        ResultSet totalFriends = statement.executeQuery("select * from friendsof" + username);
+        ResultSet totalFriends = statement.executeQuery("select * from friends" + username);
         String[] datas = new String[1000];
         byte[] imageBytes = new byte[1000];
         String[] friends  = new String[1000];
@@ -1438,7 +1438,7 @@ import Entities.User;
 
     void updateMessaging() throws Exception{
            try{
-                ResultSet totalFriends = statement.executeQuery("select * from friendsof" + username);
+                ResultSet totalFriends = statement.executeQuery("select * from friends" + username);
                 String[][] friends = new String[1000][1000];
                 int noOfFriends = 0;
                 while(totalFriends.next()){
@@ -1505,9 +1505,9 @@ class ChatManagementClass extends Thread{
                 messagingListPanel.removeAll();
                 ResultSet chatSet;
                 if(doesTableExist(connection, "chatsof" + username + friend))
-                    chatSet = statement.executeQuery("select * from chatsof" + username + friend);
+                    chatSet = statement.executeQuery("select * from chats" + username + friend);
                 else
-                    chatSet = statement.executeQuery("select * from chatsof" + friend + username);
+                    chatSet = statement.executeQuery("select * from chats" + friend + username);
 
                 String[][] chats = new String[1000][1000];
                 int x = 0;

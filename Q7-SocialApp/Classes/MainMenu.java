@@ -60,9 +60,9 @@ public class MainMenu {
         Statement statement = connection.createStatement();
 
         //Creating Database and table if not exists
-        statement.execute("create database if not exists dsa_db");
-        statement.execute("use dsa_db");
-        statement.execute("create table if not exists usercredentials (email varchar(100),username varchar(100),password varchar(100))");
+        statement.execute("create database if not exists socialapp_db");
+        statement.execute("use socialapp_db");
+        statement.execute("create table if not exists socialusers (email varchar(50),username varchar(50),password varchar(50))");
 
         mainMenuFrame = new JFrame();
         mainMenuFrame.setTitle("DSA Assignment");
@@ -77,7 +77,7 @@ public class MainMenu {
         loginPanel.setBackground(new Color(255,255,255));
         loginPanel.setBounds(0,0,1200,700);
 
-        findjobsthroughyour = new JLabel("Roll No.220417");
+        findjobsthroughyour = new JLabel("230556");
         findjobsthroughyour.setFont(new Font("Helvetica",Font.ITALIC,40));
         findjobsthroughyour.setForeground(new Color(143, 88, 73));
         findjobsthroughyour.setBounds(50, 50, 700, 45);
@@ -153,7 +153,7 @@ public class MainMenu {
             public void mouseClicked(MouseEvent e){
                 if(!loginUsernameTextfield.getText().isBlank()){
                     try {
-                        ResultSet resultSet = statement.executeQuery("select * from usercredentials where username = '" + loginUsernameTextfield.getText() + "'");
+                        ResultSet resultSet = statement.executeQuery("select * from socialusers where username = '" + loginUsernameTextfield.getText() + "'");
                         if (resultSet.next()) {
                             String userEmail = resultSet.getString("email");
                             EmailLabelForForgotPassword.setText("Email sent to " + userEmail);
@@ -216,7 +216,7 @@ public class MainMenu {
                 System.out.println(otp);
                 if(otpTextField.getText().equals(Integer.toString(otp))){
                     try {
-                        statement.execute("delete from usercredentials where username = '" + loginUsernameTextfield.getText() + "'");
+                        statement.execute("delete from socialusers where username = '" + loginUsernameTextfield.getText() + "'");
                         forgotPasswordFrame.setVisible(false);
                         loginPanel.setVisible(false);
                         loginUsernameTextfield.setText("");
@@ -262,7 +262,7 @@ public class MainMenu {
                     textFieldToRed(loginPasswordTextfield);
                 if(!emailID.isBlank() && !password.isBlank()){
                     try {
-                        ResultSet resultSet = statement.executeQuery("select * from usercredentials");
+                        ResultSet resultSet = statement.executeQuery("select * from socialusers");
                         String username = "";
                         String pass = "";
                         String email = "";
@@ -304,7 +304,7 @@ public class MainMenu {
         sideImage = new JLabel(sideimg);
         sideImage.setBounds(300,-80,1000,1000);
 
-        newAccountButton = new JButton("New to My Assignment? Join now");
+        newAccountButton = new JButton("New to Social World? Join now");
         newAccountButton.setBackground(new Color(255,255,255));
         newAccountButton.setForeground(new Color(0, 0, 0, 191));
         newAccountButton.setFont(new Font("Helvetica",Font.PLAIN,15));
@@ -409,7 +409,7 @@ public class MainMenu {
             }
         });
 
-        byclicking = new JLabel("By clicking Agree & Join or Continue, you agree to the MyAssignment");
+        byclicking = new JLabel("By clicking Agree & Join, you agree to the terms and policies of Social App!");
         byclicking.setForeground(new Color(102,102,102));
         byclicking.setFont(new Font("Helvetica",Font.PLAIN,10));
         byclicking.setBounds(38,310,500,13);
@@ -448,7 +448,7 @@ public class MainMenu {
                 if(!emailID.isBlank() && !password.isBlank() && !username.isBlank()){
 
                     try {
-                        ResultSet resultSet = statement.executeQuery("select * from usercredentials");
+                        ResultSet resultSet = statement.executeQuery("select * from socialusers");
                         boolean userExist = false;
                         while(resultSet.next()){
                             if(resultSet.getString(1).equals(emailID)){
@@ -464,7 +464,7 @@ public class MainMenu {
                             textFieldToRed(signupUsernameTextfield);
                         }
                         else{
-                            String insertQuery = "INSERT INTO usercredentials VALUES (?, ? , ?)";
+                            String insertQuery = "INSERT INTO socialusers VALUES (?, ? , ?)";
                             PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
                             preparedStatement.setString(1, emailID);
                             preparedStatement.setString(2, username);

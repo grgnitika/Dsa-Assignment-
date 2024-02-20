@@ -16,7 +16,7 @@ public class RecommendationSystem {
     public RecommendationSystem() {
         // Connect to the database
         try {
-            connection = DriverManager.getConnection("jdbc:mysql://localhost/dsa_db", "root", "Nitika");
+            connection = DriverManager.getConnection("jdbc:mysql://localhost/socialapp_db", "root", "Nitika");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -44,11 +44,11 @@ public class RecommendationSystem {
         Map<String, List<String>> graph = new HashMap<>();
         try {
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT friends FROM friendsof" + username);
+            ResultSet resultSet = statement.executeQuery("SELECT friends FROM friends" + username);
             while (resultSet.next()) {
                 String friend = resultSet.getString("friends");
                 List<String> friendsList = new ArrayList<>();
-                ResultSet friendSet = statement.executeQuery("SELECT friends FROM friendsof" + friend);
+                ResultSet friendSet = statement.executeQuery("SELECT friends FROM friends" + friend);
                 while (friendSet.next()) {
                     friendsList.add(friendSet.getString("friends"));
                 }

@@ -4,11 +4,11 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FriendRecommendation {
+public class RecommendFriends {
     private Connection connection;
 
     // Constructor to initialize the database connection
-    public FriendRecommendation(Connection connection) {
+    public RecommendFriends(Connection connection) {
         this.connection = connection;
     }
 
@@ -17,7 +17,7 @@ public class FriendRecommendation {
         List<String> friends = new ArrayList<>();
         try {
             // Prepare and execute SQL query to fetch friends of the user from the database
-            String query = "SELECT friends FROM friendsof" + user;
+            String query = "SELECT friends FROM friends" + user;
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(query);
 
@@ -70,9 +70,9 @@ public class FriendRecommendation {
     // Sample usage
     public static void main(String[] args) {
         try {
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/dsa_db", "username", "password");
-            FriendRecommendation friendRecommendation = new FriendRecommendation(connection);
-            String user = "ashishmool";
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/socialapp_db", "root", "Nitika");
+            RecommendFriends friendRecommendation = new RecommendFriends(connection);
+            String user = "nitika";
 
             // Generate and display friend recommendations for the user
             List<String> recommendations = friendRecommendation.generateFriendRecommendations(user);
